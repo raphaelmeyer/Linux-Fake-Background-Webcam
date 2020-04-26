@@ -13,14 +13,15 @@ services:
             context: ./fakecam
         network_mode: host
         read_only: true
-        # volumes:
-        #   - /path/to/background.jpg:/src/background.jpg:ro
-        #   - /path/to/foreground.jpg:/src/foreground.jpg:ro
-        #   - /path/to/foreground-mask.png:/src/foreground-mask.png:ro
+        volumes:
+            - ./images:/data/images:ro
         devices:
             # input (webcam)
             - /dev/video0:/dev/video0
             # output (virtual webcam)
-            - /dev/video2:/dev/video2
+            - /dev/video20:/dev/video20
         depends_on:
             - bodypix
+        ports:
+            # UI
+            - "8077"
