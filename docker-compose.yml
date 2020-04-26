@@ -15,6 +15,7 @@ services:
         read_only: true
         volumes:
             - ./images:/data/images:ro
+            - ./fakecam/static:/data/static:ro
         devices:
             # input (webcam)
             - /dev/video0:/dev/video0

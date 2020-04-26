@@ -5,9 +5,9 @@ import requests
 import pyfakewebcam
 from signal import signal, SIGINT
 from sys import exit
-
 import threading
 from bottle import route, run, template, static_file
+import imghdr
 
 # setup access to the *real* webcam
 cap = cv2.VideoCapture('/dev/video0')
@@ -29,14 +29,18 @@ fake = pyfakewebcam.FakeWebcam('/dev/video20', width, height)
 # declare global variables
 background = None
 use_hologram = False
-background_image = 'background.jpg'
+background_image = None
 
 def load_images():
     global background
     global background_image
 
+    filepath = '/data/static/background.jpg'
+    if background_image is not None:
+        filepath = os.path.join('/data/images', background_image)
+
     # load the virtual background
-    image = cv2.imread(os.path.join('/data/images', background_image))
+    image = cv2.imread(filepath)
     image = cv2.resize(image, (width, height))
 
     background = image
@@ -119,8 +123,15 @@ def get_frame(cap, background):
 
 @route('/')
 def index():
-    images = [f for f in os.listdir('/data/images') if os.path.isfile(os.path.join('/data/images', f))]
-    images = [img for img in images if img.endswith('.jpg')]
+    def is_image(filename):
+        path = os.path.join('/data/images', filename)
+        if not os.path.isfile(path):
+            return False
+        if imghdr.what(path) not in ['png', 'jpeg']:
+            return False
+        return True
+
+    images = [f for f in os.listdir('/data/images') if is_image(f)]
 
     return template('''
 <!DOCTYPE html>
